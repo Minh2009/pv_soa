@@ -51,6 +51,10 @@ func DecodeSupplierCreateReq(_ context.Context, r *http.Request) (interface{}, e
 	return req, nil
 }
 
+func DecodeReq(_ context.Context, r *http.Request) (interface{}, error) {
+	return nil, nil
+}
+
 type SupplierUpdateReq struct {
 	SupplierReq
 	SupplierCreateReq

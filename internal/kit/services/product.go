@@ -205,8 +205,8 @@ func (cv productSvc) ProductDistance(ctx context.Context, ip, id string) (float6
 }
 
 const (
-	CategoryProductKey = "category:%s:product"
-	SupplierProductKey = "category:%s:product"
+	CategoryProductKey = "category_product:%s"
+	SupplierProductKey = "supplier_product:%s"
 )
 
 func (cv productSvc) CreateProduct(ctx context.Context, req transforms.ProductCreateReq) (models.Product, error) {

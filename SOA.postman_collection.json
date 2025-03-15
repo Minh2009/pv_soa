@@ -352,6 +352,77 @@
 			]
 		},
 		{
+			"name": "statistics",
+			"item": [
+				{
+					"name": "List per-category",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"search\": \"\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/api/soa/v1/statistics/products-per-category",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"soa",
+								"v1",
+								"statistics",
+								"products-per-category"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List per-supplier",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"search\": \"\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/api/soa/v1/statistics/products-per-supplier",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"soa",
+								"v1",
+								"statistics",
+								"products-per-supplier"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "Product",
 			"item": [
 				{

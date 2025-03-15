@@ -83,5 +83,9 @@ func Routing(c cfg.Config, db *bun.DB, log *log.MultiLogger, cache redis.Univers
 	mux.Handle(utils.UrlWithPrefix("products", c.BasePath), productTrans)
 	mux.Handle(utils.UrlWithPrefix("products/", c.BasePath), productTrans)
 
+	statisticsSvc := services.NewStatisticsSvc(db, cache, log)
+	statisticsTrans := transports.StatisticsHttpHandler(statisticsSvc, log, c)
+	mux.Handle(utils.UrlWithPrefix("statistics/", c.BasePath), statisticsTrans)
+
 	return mux
 }
