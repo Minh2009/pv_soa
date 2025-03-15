@@ -344,8 +344,6 @@ func (cv productSvc) UpdateProduct(ctx context.Context, req transforms.ProductUp
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
-	pipe := cv.cache.Pipeline()
-
 	product, err := cv.Product(ctx, req.ProductReq.Id)
 	if err != nil {
 		return models.Product{}, err
@@ -363,6 +361,7 @@ func (cv productSvc) UpdateProduct(ctx context.Context, req transforms.ProductUp
 		product.Price = *req.Price
 	}
 
+	supplierOldId := product.SupplierId
 	var city *models.City
 	var supplier *models.Supplier
 	var existPCs []models.Category
@@ -388,8 +387,6 @@ func (cv productSvc) UpdateProduct(ctx context.Context, req transforms.ProductUp
 				return err
 			}
 			supplier = &c
-			pipe.Decr(ctx, fmt.Sprintf(SupplierProductKey, product.SupplierId))
-			pipe.Incr(ctx, fmt.Sprintf(SupplierProductKey, supplier.ID.String()))
 		}
 		return nil
 	})
@@ -434,7 +431,6 @@ func (cv productSvc) UpdateProduct(ctx context.Context, req transforms.ProductUp
 					ProductID:  product.ID,
 					CategoryID: cat.ID,
 				})
-				pipe.Decr(ctx, fmt.Sprintf(CategoryProductKey, cat.ID.String()))
 			}
 			_, err = tx.NewDelete().
 				Model(&remove).
@@ -452,7 +448,6 @@ func (cv productSvc) UpdateProduct(ctx context.Context, req transforms.ProductUp
 					ProductID:  product.ID,
 					CategoryID: cat.ID,
 				})
-				pipe.Incr(ctx, fmt.Sprintf(CategoryProductKey, cat.ID.String()))
 			}
 			_, err = tx.NewInsert().
 				Model(&insert).
@@ -478,6 +473,17 @@ func (cv productSvc) UpdateProduct(ctx context.Context, req transforms.ProductUp
 	}
 	go func() {
 		defer utils.Recovery()
+		pipe := cv.cache.Pipeline()
+		if supplier != nil {
+			pipe.Decr(ctx, fmt.Sprintf(SupplierProductKey, supplierOldId))
+			pipe.Incr(ctx, fmt.Sprintf(SupplierProductKey, supplier.ID.String()))
+		}
+		for _, cat := range toRemove {
+			pipe.Decr(ctx, fmt.Sprintf(CategoryProductKey, cat.ID.String()))
+		}
+		for _, cat := range toInsert {
+			pipe.Incr(ctx, fmt.Sprintf(CategoryProductKey, cat.ID.String()))
+		}
 		_, err = pipe.Exec(context.Background())
 		if err != nil {
 			panic(err)
