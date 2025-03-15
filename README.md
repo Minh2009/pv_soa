@@ -1,0 +1,21 @@
+# ENV
+
+APP_ENV=dev
+BASE_PATH=/api/soa/v1/
+
+SERVER_PORT=80
+
+DB_DRIVER=pg
+DB_HOST=3.1.28.125
+DB_PORT=5432
+DB_USER=postgres
+DB_PASS=M1sIWvQ2D4MfWke7ReSt2IFHVPRXtpp6
+DB_NAME=backend_test
+
+REDIS_HOST=
+REDIS_PORT=
+REDIS_PASS=
+REDIS_INDEX=
+REDIS_CLUSTER=
+
+- Need Redis to Incr, Decr statistics
