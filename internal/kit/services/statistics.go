@@ -64,6 +64,9 @@ func (cv statisticsSvc) ByCategories(ctx context.Context) (map[string]int64, err
 			break
 		}
 	}
+	if total == 0 {
+		return s, nil
+	}
 	for k, v := range rs {
 		s[k] = v * 100 / total
 	}
@@ -104,6 +107,9 @@ func (cv statisticsSvc) BySupplier(ctx context.Context) (map[string]int64, error
 		if cursor == 0 {
 			break
 		}
+	}
+	if total == 0 {
+		return s, nil
 	}
 	for k, v := range rs {
 		s[k] = v * 100 / total
