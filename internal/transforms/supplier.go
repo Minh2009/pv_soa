@@ -34,9 +34,7 @@ func DecodeSupplierReq(_ context.Context, r *http.Request) (interface{}, error) 
 }
 
 type SupplierCreateReq struct {
-	Name      string  `json:"name" validate:"required"`
-	Latitude  float64 `json:"latitude" validate:"required"`
-	Longitude float64 `json:"longitude" validate:"required"`
+	Name string `json:"name" validate:"required"`
 }
 
 func DecodeSupplierCreateReq(_ context.Context, r *http.Request) (interface{}, error) {

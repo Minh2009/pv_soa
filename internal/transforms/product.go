@@ -3,24 +3,23 @@ package transforms
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"github.com/Minh2009/pv_soa/internal/models"
 	"github.com/Minh2009/pv_soa/pkgs/utils"
 	"github.com/gorilla/mux"
 	"github.com/shopspring/decimal"
 	"net"
 	"net/http"
-	"time"
+	"regexp"
 )
 
 type ProductsReq struct {
-	Reference  []string   `json:"references,omitempty"`
-	Names      []string   `json:"names,omitempty"`
-	AddFrom    *time.Time `json:"add_from,omitempty"`
-	AddTo      *time.Time `json:"add_to,omitempty"`
-	Status     []int      `json:"status,omitempty"`
-	Categories []string   `json:"categories,omitempty"`
-	Cities     []string   `json:"cities,omitempty"`
+	Reference  []string `json:"references,omitempty"`
+	Names      []string `json:"names,omitempty"`
+	AddFrom    string   `json:"add_from,omitempty"`
+	AddTo      string   `json:"add_to,omitempty"`
+	Status     []int    `json:"status,omitempty"`
+	Categories []string `json:"categories,omitempty"`
+	Cities     []string `json:"cities,omitempty"`
 
 	Offset int `json:"offset,omitempty"`
 	Limit  int `json:"limit,omitempty"`
@@ -37,10 +36,22 @@ func (r ProductsReq) GetLimit() int {
 	return r.Limit
 }
 
+func validateDate(s string) bool {
+	pattern := `^(19|20)\d\d/(0[1-9]|1[0-2])/(0[1-9]|[12][0-9]|3[01])$`
+	re := regexp.MustCompile(pattern)
+	return re.MatchString(s)
+}
+
 func DecodeProductsReq(_ context.Context, r *http.Request) (interface{}, error) {
 	var req ProductsReq
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		return nil, err
+	}
+	if req.AddFrom != "" && !validateDate(req.AddFrom) {
+		return nil, utils.Message{Code: 422, Message: "invalid date format for add_from"}
+	}
+	if req.AddTo != "" && !validateDate(req.AddTo) {
+		return nil, utils.Message{Code: 422, Message: "invalid date format for add_to"}
 	}
 	return req, nil
 }
@@ -52,7 +63,7 @@ type ProductReq struct {
 func DecodeProductReq(_ context.Context, r *http.Request) (interface{}, error) {
 	uid := mux.Vars(r)["uid"]
 	if uid == "" {
-		return nil, errors.New("invalid uid")
+		return nil, utils.Message{Code: 422, Message: "invalid uid"}
 	}
 	return ProductReq{Id: uid}, nil
 }
@@ -78,7 +89,7 @@ func DecodeProductCreateReq(_ context.Context, r *http.Request) (interface{}, er
 		return nil, err
 	}
 	if len(req.Categories) == 0 {
-		return nil, errors.New("product must be belong to a category")
+		return nil, utils.Message{Code: 422, Message: "product must be belong to a category"}
 	}
 	valid := []models.ProductStatus{models.OnOrder, models.Available, models.OutOfStock}
 	if !utils.Contains(valid, models.ProductStatus(req.Status)) {
@@ -102,7 +113,7 @@ func DecodeProductUpdateReq(_ context.Context, r *http.Request) (interface{}, er
 		return nil, err
 	}
 	if len(req.Categories) == 0 {
-		return nil, errors.New("product must be belong to a category")
+		return nil, utils.Message{Code: 422, Message: "product must be belong to a category"}
 	}
 	valid := []models.ProductStatus{models.OnOrder, models.Available, models.OutOfStock}
 	if !utils.Contains(valid, models.ProductStatus(req.Status)) {

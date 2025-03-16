@@ -52,7 +52,9 @@ func AppMiddleware(handler http.Handler, lg *log.MultiLogger) http.Handler {
 
 func Routing(c cfg.Config, db *bun.DB, log *log.MultiLogger, cache redis.UniversalClient) *http.ServeMux {
 	mux := http.NewServeMux()
-	//mux.Handle("/", swagHttp) //don't delete or change this!!
+
+	swagHttp := transports.SwaggerHttpHandler(c)
+	mux.Handle("/", swagHttp) //don't delete or change this!!
 	mux.HandleFunc("/__health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte(http.StatusText(http.StatusOK)))

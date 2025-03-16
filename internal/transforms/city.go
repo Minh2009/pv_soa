@@ -3,7 +3,6 @@ package transforms
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"github.com/Minh2009/pv_soa/pkgs/utils"
 	"github.com/gorilla/mux"
 	"net/http"
@@ -28,7 +27,7 @@ type CityReq struct {
 func DecodeCityReq(_ context.Context, r *http.Request) (interface{}, error) {
 	uid := mux.Vars(r)["uid"]
 	if uid == "" {
-		return nil, errors.New("invalid uid")
+		return nil, utils.Message{Code: 422, Message: "invalid uid"}
 	}
 	return CityReq{Id: uid}, nil
 }

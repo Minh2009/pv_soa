@@ -2,6 +2,8 @@ package models
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/shopspring/decimal"
@@ -23,7 +25,7 @@ type Product struct {
 	bun.BaseModel `bun:"table:mh_products"`
 
 	ID        uuid.UUID       `json:"id" bun:"id,pk,type:uuid,default:uuid_generate_v4()"`
-	Reference string          `json:"reference" bun:"Reference,notnull,unique"`
+	Reference string          `json:"reference" bun:"reference,notnull,unique"`
 	Name      string          `json:"name" bun:"name,notnull"`
 	Status    ProductStatus   `json:"status" bun:"status"`
 	Price     decimal.Decimal `json:"price" bun:"price"`
@@ -52,12 +54,15 @@ func generateProductCode(ctx context.Context, db *bun.DB) (string, error) {
 	var maxCode string
 	if lastIndex == nil {
 		err := db.NewSelect().
-			ColumnExpr("COALESCE(MAX(product_code), 'PROD-"+datePrefix+"-000')").
-			TableExpr("products").
-			Where("product_code LIKE ?", "PROD-"+datePrefix+"-%").
+			ColumnExpr("COALESCE(MAX(reference), 'PROD-"+datePrefix+"-000')").
+			TableExpr("mh_products").
+			Where("reference LIKE ?", "PROD-"+datePrefix+"-%").
 			Scan(ctx, &maxCode)
-		if err != nil {
+		if err != nil && !errors.Is(err, sql.ErrNoRows) {
 			return "0", fmt.Errorf("failed to get max product code: %w", err)
+		}
+		if errors.Is(err, sql.ErrNoRows) {
+			maxCode = fmt.Sprintf("PROD-%s-%03d", datePrefix, 0)
 		}
 		lastIndex = &maxCode
 	} else {

@@ -103,6 +103,10 @@ type Message struct {
 	Message string `json:"message"`
 }
 
+func (m Message) Error() string {
+	return m.Message
+}
+
 func setHttpResponse(ctx context.Context, msg Message, result interface{}, paging *Pagination, err error) interface{} {
 	dt := data{}
 	return responseHttp{
@@ -136,11 +140,13 @@ func ResponseWriter(w http.ResponseWriter, status int, response interface{}) {
 func EncodeError(ctx context.Context, err error, w http.ResponseWriter) {
 	msgResponse := Message{Code: 500, Message: "Internal Server Error"}
 	var fieldError validator.ValidationErrors
+	var message Message
 	switch {
 	case errors.As(err, &fieldError):
 		msgResponse = Message{Code: 422, Message: err.Error()}
+	case errors.As(err, &message):
+		msgResponse = message
 	}
-
 	ResponseWriter(w, http.StatusInternalServerError, SetDefaultResponse(ctx, msgResponse))
 }
 

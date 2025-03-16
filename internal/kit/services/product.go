@@ -99,12 +99,12 @@ func (cv productSvc) Products(ctx context.Context, req transforms.ProductsReq) (
 	if len(req.Names) > 0 {
 		q.Where("name In (?)", bun.In(req.Names))
 	}
-	if req.AddFrom != nil {
-		q.Where("created_time >= ?", req.AddFrom.UTC())
-	}
-	if req.AddTo != nil {
-		q.Where("created_time <= ?", req.AddTo.UTC())
-	}
+	//if req.AddFrom != nil {
+	//	q.Where("created_time >= ?", req.AddFrom.UTC())
+	//}
+	//if req.AddTo != nil {
+	//	q.Where("created_time <= ?", req.AddTo.UTC())
+	//}
 	if len(req.Status) > 0 {
 		var st []models.ProductStatus
 		valid := []models.ProductStatus{models.Available, models.OutOfStock, models.OnOrder}
@@ -249,7 +249,7 @@ func (cv productSvc) CreateProduct(ctx context.Context, req transforms.ProductCr
 		if err != nil {
 			return err
 		}
-		if len(existPCs) > 0 {
+		if len(existPCs) == 0 {
 			return errors.New("don't have any existed product categories")
 		}
 		return nil

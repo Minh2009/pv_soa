@@ -34,7 +34,6 @@ func CategoryHttpHandler(s services.CategorySvc, log *log.MultiLogger, c cfg.Con
 		utils.EncodeResponseHTTP,
 		options...,
 	))
-
 	pr.Methods(http.MethodPut).Path(utils.UrlWithPrefix("categories/{uid}", c.BasePath)).Handler(httptransport.NewServer(
 		ep.UpdateCategory(),
 		transforms.DecodeCateUpdateReq,
